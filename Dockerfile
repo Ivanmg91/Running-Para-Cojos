@@ -77,6 +77,9 @@ ENV GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}
 
 RUN npx expo prebuild --platform android --no-install --clean
 
+# Embed the JS bundle inside the APK so it runs without a Metro server
+RUN echo "bundleInDebug=true" >> /app/RunningParaCojos/android/gradle.properties
+
 # ── Build debug APK ───────────────────────────────────────────────────────────
 WORKDIR /app/RunningParaCojos/android
 RUN chmod +x gradlew && ./gradlew assembleDebug --no-daemon --stacktrace
