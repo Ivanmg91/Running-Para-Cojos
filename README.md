@@ -69,10 +69,13 @@ cp RunningParaCojos/.env.example RunningParaCojos/.env
 ```bash
 cd RunningParaCojos
 npx expo prebuild --platform android --no-install
+# Embed the JS bundle so the APK runs without a Metro server
+echo "bundleInDebug=true" >> android/gradle.properties
 cd android && ./gradlew assembleDebug
 ```
 
 > **Nota**: `react-native-maps` y `expo-location` (background) requieren un **development build** — no funcionan completamente en Expo Go.
+> Sin `bundleInDebug=true`, el APK de debug intenta conectarse a Metro en tiempo de ejecución y muestra "unable to load script" si Metro no está activo.
 
 ### 4. Build con Docker (local, sin instalar Android SDK)
 

@@ -75,6 +75,11 @@ jobs:
           GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
         run: npx expo prebuild --platform android --no-install --clean
 
+      # Embed the JS bundle inside the APK so it runs without a Metro server
+      - name: Enable bundle-in-debug
+        working-directory: RunningParaCojos
+        run: echo "bundleInDebug=true" >> android/gradle.properties
+
       # ── 7. Cache Gradle ──────────────────────────────────────────────────────
       - name: Cache Gradle packages
         uses: actions/cache@v4
