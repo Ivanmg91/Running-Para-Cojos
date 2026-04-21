@@ -92,18 +92,34 @@ jobs:
         working-directory: RunningParaCojos/android
         run: ./gradlew assembleDebug --no-daemon --stacktrace
 
-      # ── 9. Build release APK (unsigned) ─────────────────────────────────────
-      # To sign the release APK, set these repository secrets:
+      # ── 9. Decode keystore (release only) ───────────────────────────────────
+      # Requires these repository secrets:
       #   KEYSTORE_BASE64   — base64-encoded .jks keystore
       #   KEY_ALIAS         — key alias
       #   KEY_PASSWORD      — key password
       #   STORE_PASSWORD    — keystore password
-      - name: Build release APK (unsigned)
+      - name: Decode keystore
+        if: ${{ github.event.inputs.build_type == 'release' }}
+        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > /tmp/release.jks
+
+      # ── 10. Build release APK and sign ──────────────────────────────────────
+      - name: Build release APK
         if: ${{ github.event.inputs.build_type == 'release' }}
         working-directory: RunningParaCojos/android
         run: ./gradlew assembleRelease --no-daemon --stacktrace
 
-      # ── 10. Upload APK artifact ──────────────────────────────────────────────
+      - name: Sign release APK
+        if: ${{ github.event.inputs.build_type == 'release' }}
+        run: |
+          $ANDROID_HOME/build-tools/35.0.0/apksigner sign \
+            --ks /tmp/release.jks \
+            --ks-pass pass:${{ secrets.STORE_PASSWORD }} \
+            --ks-key-alias ${{ secrets.KEY_ALIAS }} \
+            --key-pass pass:${{ secrets.KEY_PASSWORD }} \
+            --out RunningParaCojos/android/app/build/outputs/apk/release/app-release-signed.apk \
+            RunningParaCojos/android/app/build/outputs/apk/release/app-release-unsigned.apk
+
+      # ── 11. Upload APK artifact ──────────────────────────────────────────────
       - name: Upload debug APK
         if: ${{ github.event.inputs.build_type != 'release' }}
         uses: actions/upload-artifact@v4
@@ -117,7 +133,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: running-para-cojos-release-${{ github.run_number }}
-          path: RunningParaCojos/android/app/build/outputs/apk/release/app-release-unsigned.apk
+          path: RunningParaCojos/android/app/build/outputs/apk/release/app-release-signed.apk
           retention-days: 30
 
       # ── 11. Print APK info ───────────────────────────────────────────────────
