@@ -57,30 +57,47 @@ npm install
 
 ### 2. Configurar Google Maps (Android)
 
-Edita `app.json` y sustituye `YOUR_GOOGLE_MAPS_API_KEY` por tu clave de [Google Maps Platform](https://console.cloud.google.com/):
+Crea un fichero `.env` en `RunningParaCojos/` con tu clave de [Google Maps Platform](https://console.cloud.google.com/):
 
-```json
-"config": {
-  "googleMaps": {
-    "apiKey": "TU_CLAVE_AQUÍ"
-  }
-}
+```bash
+cp RunningParaCojos/.env.example RunningParaCojos/.env
+# edita RunningParaCojos/.env y pon tu clave real
 ```
 
 ### 3. Crear build de desarrollo
 
 ```bash
-npx expo prebuild --platform android
-npx expo run:android
+cd RunningParaCojos
+npx expo prebuild --platform android --no-install
+cd android && ./gradlew assembleDebug
 ```
 
 > **Nota**: `react-native-maps` y `expo-location` (background) requieren un **development build** — no funcionan completamente en Expo Go.
 
-### 4. Para distribución (APK/AAB)
+### 4. Build con Docker (local, sin instalar Android SDK)
 
 ```bash
-npx eas build --platform android --profile preview
+# desde la raíz del repo
+docker build -t running-para-cojos-builder .
+
+# genera el APK en ./output/debug/app-debug.apk
+docker run --rm \
+  -e GOOGLE_MAPS_API_KEY=AIza... \
+  -v "$(pwd)/output:/app/RunningParaCojos/android/app/build/outputs/apk" \
+  running-para-cojos-builder
 ```
+
+### 5. Build automático con GitHub Actions
+
+El workflow `.github/workflows/build-apk.yml` se ejecuta automáticamente en cada push. También puedes lanzarlo manualmente desde la pestaña **Actions** de GitHub.
+
+**Secrets requeridos** (añade en `Settings → Secrets and variables → Actions`):
+
+| Secret | Descripción |
+|---|---|
+| `GOOGLE_MAPS_API_KEY` | Clave de Google Maps Platform |
+
+El APK generado se descarga como **artefacto** del workflow (pestaña Actions → run → Artifacts).
 
 ## Permisos Android requeridos
 

@@ -27,6 +27,7 @@ export default ({ config }) => ({
     },
   },
   android: {
+    package: 'com.runningparacojos.app',
     adaptiveIcon: {
       foregroundImage: './assets/adaptive-icon.png',
       backgroundColor: '#FF6B35',
