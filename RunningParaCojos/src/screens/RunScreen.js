@@ -27,7 +27,7 @@ import {
   regionFromCoordinates,
 } from '../utils/calculations';
 
-const MIN_POINT_DISTANCE = 3; // metres — filter GPS noise
+const MIN_POINT_DISTANCE = 3; // meters — filter GPS noise
 
 export default function RunScreen({ navigation }) {
   const [permissionGranted, setPermissionGranted] = useState(false);
@@ -79,8 +79,9 @@ export default function RunScreen({ navigation }) {
           latitude: loc.coords.latitude,
           longitude: loc.coords.longitude,
         });
-      } catch (_) {
-        // Location not available yet — map shows default
+      } catch (err) {
+        // Location not available yet — map shows default region
+        console.warn('[RunScreen] Could not get initial location:', err.message);
       }
     })();
   }, [navigation]);
@@ -106,7 +107,9 @@ export default function RunScreen({ navigation }) {
   useEffect(() => {
     return () => {
       stopTimerAndPoll();
-      stopLocationTracking().catch(() => {});
+      stopLocationTracking().catch((err) =>
+        console.warn('[RunScreen] Error stopping location tracking on unmount:', err.message)
+      );
     };
   }, []);
 
