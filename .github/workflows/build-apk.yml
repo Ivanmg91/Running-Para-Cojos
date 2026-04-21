@@ -3,7 +3,7 @@ name: Build Android APK
 on:
   # Run on every push to main / master and on PRs
   push:
-    branches: [main, master, copilot/**]
+    branches: [main, master]
     paths:
       - 'RunningParaCojos/**'
       - 'Dockerfile'
@@ -29,6 +29,8 @@ jobs:
   build-apk:
     name: Build ${{ github.event.inputs.build_type || 'debug' }} APK
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       # ── 1. Checkout ──────────────────────────────────────────────────────────
